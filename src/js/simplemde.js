@@ -10,7 +10,10 @@ require("codemirror/addon/display/placeholder.js");
 require("codemirror/addon/selection/mark-selection.js");
 require("codemirror/mode/gfm/gfm.js");
 require("codemirror/mode/xml/xml.js");
-var CodeMirrorSpellChecker = require("codemirror-spell-checker");
+require("codemirror/addon/hint/show-hint.js");
+require("codemirror/addon/edit/closebrackets.js");
+require("codemirror/addon/fold/xml-fold.js");
+//var CodeMirrorSpellChecker = require("codemirror-spell-checker");
 var marked = require("marked");
 
 
@@ -1464,24 +1467,27 @@ SimpleMDE.prototype.render = function(el) {
 	}, false);
 
 	var mode, backdrop;
-	if(options.spellChecker !== false) {
-		mode = "spell-checker";
-		backdrop = options.parsingConfig;
-		backdrop.name = "gfm";
-		backdrop.gitHubSpice = false;
+	/*	if(options.spellChecker !== false) {
+			mode = "spell-checker";
+			backdrop = options.parsingConfig;
+			backdrop.name = "gfm";
+			backdrop.gitHubSpice = false;
 
-		CodeMirrorSpellChecker({
-			codeMirrorInstance: CodeMirror
-		});
-	} else {
-		mode = options.parsingConfig;
-		mode.name = "gfm";
-		mode.gitHubSpice = false;
-	}
+			CodeMirrorSpellChecker({
+				codeMirrorInstance: CodeMirror
+			});
+		} else {
+			mode = options.parsingConfig;
+			mode.name = "gfm";
+			mode.gitHubSpice = false;
+		}*/
+	mode = options.parsingConfig;
+	mode.name = "gfm";
+	mode.gitHubSpice = false;
 
 	this.codemirror = CodeMirror.fromTextArea(el, {
 		mode: mode,
-		backdrop: backdrop,
+		//backdrop: backdrop,
 		theme: "paper",
 		tabSize: (options.tabSize != undefined) ? options.tabSize : 2,
 		indentUnit: (options.tabSize != undefined) ? options.tabSize : 2,
@@ -1492,7 +1498,8 @@ SimpleMDE.prototype.render = function(el) {
 		lineWrapping: (options.lineWrapping === false) ? false : true,
 		allowDropFileTypes: ["text/plain"],
 		placeholder: options.placeholder || el.getAttribute("placeholder") || "",
-		styleSelectedText: (options.styleSelectedText != undefined) ? options.styleSelectedText : true
+		styleSelectedText: (options.styleSelectedText != undefined) ? options.styleSelectedText : true,
+        autoCloseBrackets: true
 	});
 
 	if(options.forceSync === true) {
@@ -1532,7 +1539,7 @@ function isLocalStorageAvailable() {
 		try {
 			localStorage.setItem("smde_localStorage", 1);
 			localStorage.removeItem("smde_localStorage");
-		} catch(e) {
+		} catch (e) {
 			return false;
 		}
 	} else {
@@ -2023,6 +2030,12 @@ SimpleMDE.prototype.toTextArea = function() {
 		this.autosaveTimeoutId = undefined;
 		this.clearAutosavedValue();
 	}
+};
+
+SimpleMDE.prototype.findMatchingTag = function() {
+    var cm = this.codemirror;
+
+    return CodeMirror.findMatchingTag(cm, cm.getCursor());
 };
 
 module.exports = SimpleMDE;
